@@ -3,7 +3,7 @@ const app=express();
 const mongoose=require('mongoose')
 const { MongoClient } = require('mongodb');
 const bodyParser=require('body-parser')
-require('dotenv/config')
+require('dotenv').config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))
@@ -25,6 +25,6 @@ mongoose.connect(connect_db,{
     useNewUrlParser:true,
 })
 
-app.listen(8000);
+app.listen(process.env.PORT||3001);
 
 
