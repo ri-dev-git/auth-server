@@ -68,15 +68,15 @@ router.post("/login", (request, response) => {
   });
   
   
-// /api/products/01
-//GET product by id
-router.get('/:user',async(req,res)=>{
+
+//GET logged in user
+router.get('/login',async(req,res)=>{
     try{
-        const product = await users.findById(req.params.product_id);
-        res.status(200).json(product);
+        const loggedInUser = await users.findOne(req.params.email);
+        res.status(200).json(loggedInUser);
     }catch(err){
         res.status(404).json({
-            "status":"Product was not found..."
+            "status":"Somethinng went wrong..."
         })
     }
 })

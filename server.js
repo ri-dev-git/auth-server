@@ -40,7 +40,7 @@ app.use((req, res, next) => {
       "GET, POST, PUT, DELETE, PATCH, OPTIONS"
     );
     next();
-  });
+  }); 
 app.listen(3001);
 
 
