@@ -29,20 +29,20 @@ const connect_db='mongodb+srv://rishi:zjzC6cMiid6mFlHl@cluster0.nvf4z.mongodb.ne
 mongoose.connect(connect_db,{
     useNewUrlParser:true,
 })
-// app.use((req, res, next) => {
-//     res.setHeader("Access-Control-Allow-Origin", "*");
-//     res.setHeader(
-//       "Access-Control-Allow-Headers",
-//       "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-//     );
-//     res.setHeader(
-//       "Access-Control-Allow-Methods",
-//       "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-//     );
-//     next();
-//   }); 
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    );
+    next();
+  }); 
 
 
-app.listen(process.env.PORT);
+// app.listen(process.env.PORT);
 
 
