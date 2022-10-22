@@ -1,31 +1,78 @@
 const express= require('express');
 const router= express.Router();
-const Users=require('./db')
+const bcrypt = require("bcrypt");
+const users=require('./db')
+
+const auth = require("./auth");
+const jwt = require("jsonwebtoken");
 
 // Get all products
-// /api/products/
-router.get('/login',async(req,res)=>{
-    try{
-    
-        const products=await Users.find();
-        res.json(products);
-        
-    }
-    catch(err){
-        res.status(404).json(
-            {
-                "status":404,
-                "reason":"Page Not Found"
-            }
-        )
-    }
-})
+router.get("/auth-endpoint", auth, (request, response) => {
+    response.json({ message: "You are authorized to access me" });
+  });
+  
 
+router.post("/login", (request, response) => {
+    // check if email exists
+    users.findOne({ email: request.body.email })
+  
+      // if email exists
+      .then((user) => {
+        // compare the password entered and the hashed password found
+        bcrypt
+          .compare(request.body.password, user.password)
+  
+          // if the passwords match
+          .then((passwordCheck) => {
+  
+            // check if password matches
+            if(!passwordCheck) {
+              return response.status(400).send({
+                message: "Passwords does not match",
+                error,
+              });
+            }
+  
+            //   create JWT token
+            const token = jwt.sign(
+              {
+                userId: user._id,
+                userEmail: user.email,
+              },
+              "RANDOM-TOKEN",
+              { expiresIn: "24h" }
+            );
+  
+            //   return success response
+            response.status(200).send({
+              message: "Login Successful",
+              email: user.email,
+              token,
+            });
+          })
+          // catch error if password does not match
+          .catch((error) => {
+            response.status(400).send({
+              message: "Passwords does not match",
+              error,
+            });
+          });
+      })
+      // catch error if email does not exist
+      .catch((e) => {
+        response.status(404).send({
+          message: "Email not found",
+          e,
+        });
+      });
+  });
+  
+  
 // /api/products/01
 //GET product by id
 router.get('/:user',async(req,res)=>{
     try{
-        const product = await Users.findById(req.params.product_id);
+        const product = await users.findById(req.params.product_id);
         res.status(200).json(product);
     }catch(err){
         res.status(404).json({
@@ -34,29 +81,49 @@ router.get('/:user',async(req,res)=>{
     }
 })
 
-//POST 
+
+//POST
+
 router.post('/signup',async(req,res)=>{
-    if(req.body.quantity<0){
-        return res.status(416).json({
-            "status":"failure",
-            "reason":"quantity should be grater than 0"
-        })
-    }
-    const user= new Users({
-        fisrtName: req.body.name,
-        lastName: req.body.lastName,
+    console.log(req.body)
+    
+    bcrypt
+    .hash(req.body.password, 10)
+    .then((hashedPassword) => {
+      // create a new user instance and collect the data
+      const user = new users({
+        firstName:req.body.firstName,
+        lastName:req.body.lastName,
         email: req.body.email,
-        photoUrl: req.body.photoUrl,
-    });
-    try{
-    const savedUser=await user.save()
-    res.status(201).json(savedUser);
-    }catch(err){
-        res.status(400).json({
-            "status": "failure",
-            "reason": "request error"
+        password: hashedPassword,
+        photoUrl:req.body.photoUrl
+      });
+
+      // save the new user
+      user
+        .save()
+        // return success if the new user is added to the database successfully
+        .then((result) => {
+          res.status(201).send({
+            message: "User Created Successfully",
+            result,
+          });
         })
-    }
+        // catch error if the new user wasn't added successfully to the database
+        .catch((error) => {
+          res.status(500).send({
+            message: "Error creating user",
+            error,
+          });
+        });
+    })
+    // catch error if the password hash isn't successful
+    .catch((e) => {
+      res.status(500).send({
+        message: "Password was not hashed successfully",
+        e,
+      });
+    });
 })
 
 
